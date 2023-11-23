@@ -1,0 +1,106 @@
+== Uruchomienie z docker-compose:
+
+* Instalacja CLI (opcjonalnie):
+
+    brew install kafka
+
+* Run docker-compose
+
+    sudo docker-compose up
+
+* Sprawdź czy UI odpowiada i podłączył sie do kafki: http://localhost:8080[kafka-ui]
+
+* Sprawdź czy działa CLI
+ś
+** jak zrobiłeś ```brew install kafka```
+
+    kafka-topics
+
+** jeżeli NIE zrobiłeś ```brew install kafka``` to trzeba wywoływać wszystkie kolejne polecenia w kontenerze
+
+    docker exec -it kafka /bin/bash
+
+    kafka-topics
+
+
+* Utwórz topic:
+
+    kafka-topics --bootstrap-server localhost:9092 --topic mynewtopic --create --partitions 3
+
+* Potwierdź, że się utworzył z 3 partycjami z poziomu CLI lub ui http://localhost:8080/ui/clusters/local/all-topics?perPage=25[kafka-ui/topics] (chwilę trzeba poczekać bo musi się odświeżyć)
+
+    kafka-topics --bootstrap-server localhost:9092 --list
+    kafka-topics --bootstrap-server localhost:9092 --topic mynewtopic --describe
+
+* Utwórz pierwszego consumera (w osobnym terminalu)
+
+    kafka-console-consumer --bootstrap-server localhost:9092 --topic mynewtopic
+
+* Utwórz producera (w osobnym terminalu)
+
+    kafka-console-producer --bootstrap-server localhost:9092 --producer-property partitioner.class=org.apache.kafka.clients.producer.RoundRobinPartitioner --topic mynewtopic
+
+* Wpisz jakieś wiadomości (enter == wysłanie wiadomości)
+
+    >jednen
+    >dwa
+    >trzy
+
+* Zweryfikuj czy consumer je otrzymał
+
+* Utwórz kolejnego cosumera (w osobnym terminalu)
+
+    kafka-console-consumer --bootstrap-server localhost:9092 --topic mynewtopic --from-beginning
+
+* Wpisz jakieś wiadomości (enter == wysłanie wiadomości)
+
+    >jednen
+    >dwa
+    >trzy
+
+* Zweryfikuj że obu consumerów je otrzymało i czy widac je w ui
+http://localhost:8080/ui/clusters/local/all-topics/mynewtopic/messages?keySerde=String&valueSerde=String&limit=100[kafka-ui]
+
+
+=== 💣 Problem!!! 💣:
+Jak sie utworzy consumerów w tej samej grupie to kafka przestaje działać, poniżej kroki
+
+* Utwórz topic:
+
+    kafka-topics --bootstrap-server localhost:9092 --topic mynewtopic2 --create --partitions 3
+
+* Potwierdź, że się utworzył z 3 partycjami
+
+    kafka-topics --bootstrap-server localhost:9092 --list
+    kafka-topics --bootstrap-server localhost:9092 --topic mynewtopic2 --describe
+
+* Utwórz pierwszego consumera w grupie 1 (w osobnym terminalu)
+
+    kafka-console-consumer --bootstrap-server localhost:9092 --topic mynewtopic2 --group my-first-group
+
+* Utwórz drugiego consumera w grupie 1 (w osobnym terminalu)
+
+    kafka-console-consumer --bootstrap-server localhost:9092 --topic mynewtopic2 --group my-first-group
+
+* Utwórz producera (w osobnym terminalu)
+
+    kafka-console-producer --bootstrap-server localhost:9092 --producer-property partitioner.class=org.apache.kafka.clients.producer.RoundRobinPartitioner --topic mynewtopic2
+
+* Zweryfikuj czy consumerzy otrzymują wiadomości na zmianę, nie koniecznie po kolei. [.red]#U mnie czasami kafka przestaje odpowiadać ☠️#
+
+
+
+
+== Uruchomienie lokalne bez dockerów:
+
+- Instalacja
+
+    brew install kafka
+
+- Start Zookeeper
+
+    /opt/homebrew/bin/zookeeper-server-start /opt/homebrew/etc/zookeeper/zoo.cfg
+
+- Start Apache Kafka
+
+    /opt/homebrew/bin/kafka-server-start /opt/homebrew/etc/kafka/server.properties
