@@ -11,7 +11,7 @@
 * Sprawdź czy UI odpowiada i podłączył sie do kafki: http://localhost:8080[kafka-ui]
 
 * Sprawdź czy działa CLI
-ś
+
 ** jak zrobiłeś ```brew install kafka```
 
     kafka-topics
