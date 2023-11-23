@@ -6,7 +6,11 @@
 
 * Run docker-compose
 
-    sudo docker-compose up
+    sudo docker-compose up -d
+
+    lub
+
+    sudo docker-compose -f docker-compose-simple.yml up -d
 
 * Sprawdź czy UI odpowiada i podłączył sie do kafki: http://localhost:8080[kafka-ui]
 
